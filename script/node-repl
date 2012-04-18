@@ -4,13 +4,18 @@ if [ "$CLOJURESCRIPT_HOME" = "" ]; then
   CLOJURESCRIPT_HOME="`dirname $0`/.."
 fi
 
+out=$CLOJURESCRIPT_HOME/out/repl.js.log
+err=$CLOJURESCRIPT_HOME/out/repl.js.err
+
 CLJSC_CP=''
 for next in lib/*: src/clj: src/cljs: test/cljs; do
   CLJSC_CP=$CLJSC_CP$CLOJURESCRIPT_HOME'/'$next
 done
 
-/usr/local/bin/node $CLOJURESCRIPT_HOME/bin/repl.js &
+node $CLOJURESCRIPT_HOME/bin/repl.js >$out 2>$err &
+pid=$!
 java -server -cp $CLJSC_CP clojure.main -e \
 "(require '[cljs.repl :as repl])
 (require '[cljs.repl.node :as node])
 (repl/repl (node/repl-env $1))"
+kill $pid
